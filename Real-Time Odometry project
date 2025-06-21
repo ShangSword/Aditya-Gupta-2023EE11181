@@ -1,0 +1,667 @@
+
+Details Plain text
+/* USER CODE BEGIN Header */
+/**
+  
+******************************************************************************
+   * @file : main.c
+   * @brief : Main program body
+  
+******************************************************************************
+   * @attention
+   *
+   * Copyright (c) 2024 STMicroelectronics.
+   * All rights reserved.
+   *
+   * This software is licensed under terms that can be found in the
+LICENSE file
+   * in the root directory of this software component.
+   * If no LICENSE file comes with this software, it is provided AS-IS.
+   *
+  
+******************************************************************************
+   */
+/* USER CODE END Header */
+/* Includes
+------------------------------------------------------------------*/
+#include "main.h"
+
+/* Private includes
+----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "stdio.h"
+#include "stdint.h"
+#include "math.h"
+#include "stdlib.h"
+
+
+
+
+
+
+/* USER CODE END Includes */
+
+/* Private typedef
+-----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define
+------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro
+-------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables
+---------------------------------------------------------*/
+CAN_HandleTypeDef hcan1;
+
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+
+/* USER CODE BEGIN PV */
+CAN_HandleTypeDef *hcan;
+uint16_t id = 0x285;
+uint8_t data[8];
+uint8_t DLC;
+int counter =0;
+int counter_overall=0;
+int transmission=0;
+uint16_t speed=0;
+int spokes = 10;
+int mod=0;
+int radius = 10;
+int awesome =0;
+int gupta=0;
+uint16_t speed_in_x=0;
+uint16_t TxData_imp[16];
+uint32_t ide;
+/* USER CODE END PV */
+
+/* Private function prototypes
+-----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_CAN1_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM1_Init(void);
+/* USER CODE BEGIN PFP */
+
+void CAN1_Tx(CAN_HandleTypeDef *hcan, uint16_t id, uint16_t data_tx);
+
+void CAN_Start();
+void CAN_Transmit1_Messages();
+void CAN1transmit(void);
+CAN_TxHeaderTypeDef TxHeader;
+uint32_t Txmailbox = 0x00U;
+uint16_t decimal_to_binary(uint16_t n);
+void Convert_to_16_bit(const char *binary_string , char* result);
+
+/* USER CODE END PFP */
+
+/* Private user code
+---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+CAN_TxHeaderTypeDef TxHeader1;
+CAN_TxHeaderTypeDef TxHeader2;
+CAN_RxHeaderTypeDef RxHeader;
+CAN_RxHeaderTypeDef RxHeader2;
+uint8_t rxData[8]; // This is for receiving your 8 byte data
+uint32_t TxMailbox1;
+uint32_t TxMailbox2;
+int callback1 = 0, callback2 = 0, received1 = 0, received2 = 0,
+notificationactivated1 = 0, notificationactivated2 = 0, insidewhile = 0,
+transmission1 = 0, transmission2 = 0, transmittingcan = 0;
+/* USER CODE END 0 */
+
+/**
+   * @brief The application entry point.
+   * @retval int
+   */
+int main(void)
+{
+
+   /* USER CODE BEGIN 1 */
+
+   /* USER CODE END 1 */
+
+   /* MCU
+Configuration--------------------------------------------------------*/
+
+   /* Reset of all peripherals, Initializes the Flash interface and the
+Systick. */
+   HAL_Init();
+
+   /* USER CODE BEGIN Init */
+
+   /* USER CODE END Init */
+
+   /* Configure the system clock */
+   SystemClock_Config();
+
+   /* USER CODE BEGIN SysInit */
+
+   /* USER CODE END SysInit */
+
+   /* Initialize all configured peripherals */
+   MX_GPIO_Init();
+   MX_CAN1_Init();
+   MX_TIM2_Init();
+   MX_TIM1_Init();
+   /* USER CODE BEGIN 2 */
+   HAL_TIM_Base_Start_IT(&htim2);
+   CAN_Start();
+     /* USER CODE BEGIN 2 */
+
+     TxHeader1.StdId = 0x285;
+     TxHeader1.RTR = CAN_RTR_DATA;
+     TxHeader1.IDE = CAN_ID_STD;
+     TxHeader1.DLC = 2;
+// TxHeader.DLC = 8;
+// TxHeader.StdId = 0x01; // 11 bits
+// TxHeader.IDE = 0x00000139;
+// TxHeader.RTR = CAN_RTR_DATA;
+     CAN1transmit();
+   /* USER CODE END 2 */
+
+   /* Infinite loop */
+   /* USER CODE BEGIN WHILE */
+   while (1)
+   {
+awesome++;
+
+// else(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_15) == GPIO_PIN_RESET)
+// {
+// counter =counter +0;
+// }
+
+     /* USER CODE END WHILE */
+
+     /* USER CODE BEGIN 3 */
+   }
+// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+// {gupta++;
+// if(GPIO_Pin == likhde_laude_Pin)
+// {
+// if(HAL_GPIO_ReadPin(GPIOF, likhde_laude_Pin) == GPIO_PIN_SET)
+// {
+// counter = counter+1;
+// }
+// }
+// } // counter/spikes = number of rotations
+
+
+   /* USER CODE END 3 */
+}
+
+/**
+   * @brief System Clock Configuration
+   * @retval None
+   */
+void SystemClock_Config(void)
+{
+   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+   /** Configure the main internal regulator output voltage
+   */
+   __HAL_RCC_PWR_CLK_ENABLE();
+   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+
+   /** Initializes the RCC Oscillators according to the specified
+parameters
+   * in the RCC_OscInitTypeDef structure.
+   */
+   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+   {
+     Error_Handler();
+   }
+
+   /** Initializes the CPU, AHB and APB buses clocks
+   */
+   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) !=
+HAL_OK)
+   {
+     Error_Handler();
+   }
+}
+
+/**
+   * @brief CAN1 Initialization Function
+   * @param None
+   * @retval None
+   */
+static void MX_CAN1_Init(void)
+{
+
+   /* USER CODE BEGIN CAN1_Init 0 */
+
+   /* USER CODE END CAN1_Init 0 */
+
+   /* USER CODE BEGIN CAN1_Init 1 */
+
+   /* USER CODE END CAN1_Init 1 */
+   hcan1.Instance = CAN1;
+   hcan1.Init.Prescaler = 2;
+   hcan1.Init.Mode = CAN_MODE_NORMAL;
+   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+   hcan1.Init.TimeSeg1 = CAN_BS1_11TQ;
+   hcan1.Init.TimeSeg2 = CAN_BS2_4TQ;
+   hcan1.Init.TimeTriggeredMode = DISABLE;
+   hcan1.Init.AutoBusOff = DISABLE;
+   hcan1.Init.AutoWakeUp = DISABLE;
+   hcan1.Init.AutoRetransmission = DISABLE;
+   hcan1.Init.ReceiveFifoLocked = DISABLE;
+   hcan1.Init.TransmitFifoPriority = DISABLE;
+   if (HAL_CAN_Init(&hcan1) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   /* USER CODE BEGIN CAN1_Init 2 */
+
+   /* USER CODE END CAN1_Init 2 */
+
+}
+
+/**
+   * @brief TIM1 Initialization Function
+   * @param None
+   * @retval None
+   */
+static void MX_TIM1_Init(void)
+{
+
+   /* USER CODE BEGIN TIM1_Init 0 */
+
+   /* USER CODE END TIM1_Init 0 */
+
+   TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+   TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+   /* USER CODE BEGIN TIM1_Init 1 */
+
+   /* USER CODE END TIM1_Init 1 */
+   htim1.Instance = TIM1;
+   htim1.Init.Prescaler = 0;
+   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+   htim1.Init.Period = 65535;
+   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+   htim1.Init.RepetitionCounter = 0;
+   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_DISABLE;
+   sSlaveConfig.InputTrigger = TIM_TS_ITR0;
+   if (HAL_TIM_SlaveConfigSynchro(&htim1, &sSlaveConfig) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+   if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) !=
+HAL_OK)
+   {
+     Error_Handler();
+   }
+   /* USER CODE BEGIN TIM1_Init 2 */
+
+   /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+   * @brief TIM2 Initialization Function
+   * @param None
+   * @retval None
+   */
+static void MX_TIM2_Init(void)
+{
+
+   /* USER CODE BEGIN TIM2_Init 0 */
+
+   /* USER CODE END TIM2_Init 0 */
+
+   TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+   TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+   /* USER CODE BEGIN TIM2_Init 1 */
+
+   /* USER CODE END TIM2_Init 1 */
+   htim2.Instance = TIM2;
+   htim2.Init.Prescaler = 31;
+   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+   htim2.Init.Period = 9999;
+   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_DISABLE;
+   sSlaveConfig.InputTrigger = TIM_TS_ITR0;
+   if (HAL_TIM_SlaveConfigSynchro(&htim2, &sSlaveConfig) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+   if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) !=
+HAL_OK)
+   {
+     Error_Handler();
+   }
+   /* USER CODE BEGIN TIM2_Init 2 */
+
+   /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+   * @brief GPIO Initialization Function
+   * @param None
+   * @retval None
+   */
+static void MX_GPIO_Init(void)
+{
+   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
+
+   /* GPIO Ports Clock Enable */
+   __HAL_RCC_GPIOF_CLK_ENABLE();
+   __HAL_RCC_GPIOG_CLK_ENABLE();
+   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+   /*Configure GPIO pin Output Level */
+   HAL_GPIO_WritePin(GPIOG, GPIO_PIN_0, GPIO_PIN_RESET);
+
+   /*Configure GPIO pin : likhde_laude_Pin */
+   GPIO_InitStruct.Pin = likhde_laude_Pin;
+   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+   GPIO_InitStruct.Pull = GPIO_NOPULL;
+   HAL_GPIO_Init(likhde_laude_GPIO_Port, &GPIO_InitStruct);
+
+   /*Configure GPIO pin : PG0 */
+   GPIO_InitStruct.Pin = GPIO_PIN_0;
+   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+   GPIO_InitStruct.Pull = GPIO_NOPULL;
+   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+   /* EXTI interrupt init*/
+   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
+}
+
+/* USER CODE BEGIN 4 */
+uint16_t decimal_to_binary(uint16_t decimal) {
+     uint16_t binary = 0;
+     int i = 0;
+
+     // Convert the decimal number to binary and assign it to binary
+variable
+     while (decimal > 0) {
+         binary |= (decimal % 2) << i; // Set the i-th bit of binary
+         decimal /= 2; // Divide decimal by 2 to get
+next bit
+         i++;
+     }
+
+     return binary;
+}
+
+void Convert_to_16_bit(const char *binary_string, char *result)
+{
+     int len = strlen(binary_string);
+
+     // Check if input string is valid binary
+     for (int i = 0; i < len; i++) {
+         if (binary_string[i] != '0' && binary_string[i] != '1') {
+             printf("Error: Input string must contain only binary digits
+(0 or 1).\n");
+             exit(EXIT_FAILURE);
+         }
+     }
+
+     if (len > 16) {
+         // Truncate if longer than 16 bits
+         strncpy(result, binary_string + len - 16, 16);
+         result[16] = '\0'; // Null-terminate the result
+     } else {
+         // Pad with leading zeros if shorter than 16 bits
+         int padding = 16 - len;
+         for (int i = 0; i < padding; i++) {
+             result[i] = '0'; // Add leading zeros
+         }
+         strcpy(result + padding, binary_string); // Copy the original
+string
+     }
+}
+
+void CAN_Start() {
+     CAN_FilterTypeDef filter1, filter2;
+
+     filter1.FilterBank = 0;
+
+     filter1.FilterActivation = ENABLE;
+     filter1.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+
+     filter1.FilterScale = CAN_FILTERSCALE_32BIT;
+     filter1.FilterMode = CAN_FILTERMODE_IDMASK;
+
+     filter1.FilterMaskIdHigh = 0x00AA;
+     filter1.FilterMaskIdLow = 0x00AA;
+
+     filter1.FilterIdLow = 0x00AA;
+     filter1.FilterIdHigh = 0x00AA;
+
+     filter1.SlaveStartFilterBank = 14;
+
+     filter2.FilterBank = 15;
+
+     filter2.FilterActivation = ENABLE;
+     filter2.FilterFIFOAssignment = CAN_FILTER_FIFO1;
+
+     filter2.FilterScale = CAN_FILTERSCALE_32BIT;
+     filter2.FilterMode = CAN_FILTERMODE_IDMASK;
+
+     filter2.FilterMaskIdHigh = 0x00BB;
+     filter2.FilterMaskIdLow = 0x00BB;
+
+     filter2.FilterIdLow = 0x00BB;
+     filter2.FilterIdHigh = 0x00BB;
+
+     filter2.SlaveStartFilterBank = 14;
+
+     if (HAL_CAN_ConfigFilter(&hcan1, &filter1) != HAL_OK) { //
+Configuring CAN line according to Filter values
+         Error_Handler();
+     }
+
+
+     if (HAL_CAN_Start(&hcan1) != HAL_OK) { // CAN start
+         Error_Handler();
+     }
+}
+
+//void CAN_Tx(CAN_HandleTypeDef *hcan, uint32_t id, uint8_t *data_tx) {
+//
+//
+// if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
+// ide = TxHeader.StdId;
+// if (HAL_CAN_AddTxMessage(hcan, &TxHeader, counter,
+&Txmailbox) != HAL_OK) {
+// Error_Handler();
+// }
+// else{
+// transmission++;
+// }
+// }
+// }
+
+void CAN_Activate(void) {
+     if (HAL_CAN_Start(&hcan) != HAL_OK) {
+         // CAN start error
+         Error_Handler();
+     }
+
+     // Enable RX interrupt
+     if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING)
+!= HAL_OK) {
+         // Notification error
+         Error_Handler();
+     }
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+     // Retrieve the received message
+     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rxData) ==
+HAL_OK) {
+         // Process the received data
+         if (RxHeader.StdId == 0x139) { // Check for a specific CAN ID
+it is 0x139 in our cawse
+             // Handle data in rxData
+             speed_in_x = (rxData[0] >>8)| rxData[1];
+
+         }
+     }
+}
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{gupta++;
+  if(GPIO_Pin == likhde_laude_Pin)
+  {
+  if(HAL_GPIO_ReadPin(likhde_laude_GPIO_Port, likhde_laude_Pin))
+  {
+  counter = counter+1;
+  counter_overall++;
+  }
+  }
+} // counter/spikes = number of rotations
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+if(htim== &htim2){
+mod= mod+1;
+if(mod%10==0){
+speed= counter*10*radius*6/spokes; // 50 is because this is called
+back after every 0.02s
+counter =0;
+             TxData_imp[16] = decimal_to_binary(speed);
+     // Txdata_imp = Convert_to_16_bit(speed)
+             if (transmittingcan == 1)
+                 {
+                   if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader1,
+TxData_imp[16], &TxMailbox1) != HAL_OK)
+                   {
+                     Error_Handler();
+                   }
+                   else
+                   {
+                     transmission1++;
+                   }
+                 }
+
+
+}
+
+
+/* rpm = counter*10/spokes; // 50 is because this is called back after
+every 0.02s
+counter =0;
+if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, rpm, &Txmailbox) !=
+HAL_OK) {
+                Error_Handler();
+            }
+            else{
+            transmission++;
+            }*/
+}
+
+}
+void CAN1transmit(void)
+{
+   transmittingcan = 1;
+}
+//void CAN_Transmit1_Messages(){
+// CAN1_Tx(&hcan1,0x285,TxData_imp);
+//}
+//void CAN1_Tx(CAN_HandleTypeDef *hcan, uint16_t id, uint16_t data_tx) {
+// CAN_TxHeaderTypeDef TxHeader;
+// uint32_t Txmailbox = 0x00U;
+// TxHeader.DLC = 2;
+// TxHeader.StdId = id; // 11 bits
+// TxHeader.IDE = CAN_ID_STD;
+// TxHeader.RTR = CAN_RTR_DATA;
+//
+// if (HAL_CAN_GetTxMailboxesFreeLevel(hcan) > 0) {
+// ide = TxHeader.StdId;
+// if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, data_tx, &Txmailbox) !=
+HAL_OK) {
+// Error_Handler();
+// }
+// }
+//
+//}
+/* USER CODE END 4 */
+
+/**
+   * @brief This function is executed in case of error occurrence.
+   * @retval None
+   */
+void Error_Handler(void)
+{
+   /* USER CODE BEGIN Error_Handler_Debug */
+   /* User can add his own implementation to report the HAL error return
+state */
+   __disable_irq();
+   while (1)
+   {
+   }
+   /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef USE_FULL_ASSERT
+/**
+   * @brief Reports the name of the source file and the source line
+number
+   * where the assert_param error has occurred.
+   * @param file: pointer to the source file name
+   * @param line: assert_param error line source number
+   * @retval None
+   */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+   /* USER CODE BEGIN 6 */
+   /* User can add his own implementation to report the file name and
+line number,
+      ex: printf("Wrong parameters value: file %s on line %d\r\n", file,
+line) */
+   /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
