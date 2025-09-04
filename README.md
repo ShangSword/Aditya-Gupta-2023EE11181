@@ -13,7 +13,7 @@ SLAM on AGV - for SLAM on AGV Proj
 Real - time odometry - for real time odometry proj
 
 
-Resonant Converter - This contains a part of the Resonant converter. 
+Hardware and Simulation_file - This contains a part of the Resonant converter. 
 
 A Half documentation behind the simulation file - with simulating the converter and to a bit of trying to control the dead time within Plecs.
 
