@@ -1,5 +1,5 @@
 # Aditya-Gupta-2023EE11181
-Aditya Gupta 2023EE11181 Intern season 
+Aditya Gupta 2023EE11181 
 
 
 SUPREM4 - For SUPREM4 proj
