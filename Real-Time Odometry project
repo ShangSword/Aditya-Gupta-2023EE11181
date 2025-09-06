@@ -188,9 +188,9 @@ awesome++;
    }
 // void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 // {gupta++;
-// if(GPIO_Pin == likhde_laude_Pin)
+// if(GPIO_Pin == The_Pin)
 // {
-// if(HAL_GPIO_ReadPin(GPIOF, likhde_laude_Pin) == GPIO_PIN_SET)
+// if(HAL_GPIO_ReadPin(GPIOF, The_Pin) == GPIO_PIN_SET)
 // {
 // counter = counter+1;
 // }
@@ -395,11 +395,11 @@ static void MX_GPIO_Init(void)
    /*Configure GPIO pin Output Level */
    HAL_GPIO_WritePin(GPIOG, GPIO_PIN_0, GPIO_PIN_RESET);
 
-   /*Configure GPIO pin : likhde_laude_Pin */
-   GPIO_InitStruct.Pin = likhde_laude_Pin;
+   /*Configure GPIO pin : The_Pin */
+   GPIO_InitStruct.Pin = The_Pin;
    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
    GPIO_InitStruct.Pull = GPIO_NOPULL;
-   HAL_GPIO_Init(likhde_laude_GPIO_Port, &GPIO_InitStruct);
+   HAL_GPIO_Init(The_GPIO_Port, &GPIO_InitStruct);
 
    /*Configure GPIO pin : PG0 */
    GPIO_InitStruct.Pin = GPIO_PIN_0;
@@ -553,9 +553,9 @@ it is 0x139 in our cawse
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {gupta++;
-  if(GPIO_Pin == likhde_laude_Pin)
+  if(GPIO_Pin == The_Pin)
   {
-  if(HAL_GPIO_ReadPin(likhde_laude_GPIO_Port, likhde_laude_Pin))
+  if(HAL_GPIO_ReadPin(The_GPIO_Port, The_Pin))
   {
   counter = counter+1;
   counter_overall++;
