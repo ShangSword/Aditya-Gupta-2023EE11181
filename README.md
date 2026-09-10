@@ -1,6 +1,8 @@
 # Aditya-Gupta-2023EE11181
 Aditya Gupta 2023EE11181 
 
+PEDES 2026 Paper on Novel Dead Time Control For High Frequency DC-DC Converters.
+
 
 SUPREM4 - For SUPREM4 proj
 
